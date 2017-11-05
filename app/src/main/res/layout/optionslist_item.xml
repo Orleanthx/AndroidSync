@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/optionlist_item"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    app:layout_constraintVertical_weight="1"
+    tools:context="com.cangevgeli.androidsync.MainActivity">
+
+<android.support.constraint.Guideline
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/checkBoxBegin"
+    android:orientation="vertical"
+    app:layout_constraintGuide_percent="0.05" />
+
+<android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/optionTextBegin"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
+
+<CheckBox
+    android:id="@+id/checkBox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintLeft_toLeftOf="@+id/checkBoxBegin" />
+
+<TextView
+    android:id="@+id/optionText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    app:layout_constraintLeft_toRightOf="@+id/checkBox"
+    app:layout_constraintTop_toTopOf="@+id/checkBox"
+    app:layout_constraintBottom_toBottomOf="@+id/checkBox"
+    android:text="Option" />
+
+</android.support.constraint.ConstraintLayout>

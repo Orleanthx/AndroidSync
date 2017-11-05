@@ -1,6 +1,7 @@
 package com.cangevgeli.androidsync;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.Ringtone;
@@ -8,6 +9,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -17,12 +19,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ListView optionsList;
+    private OptionsListAdapter optionsListAdapter;
+
+    private ConstraintLayout mainLayout;
+    private ConstraintLayout backupLayout;
+    private ConstraintLayout syncLayout;
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -36,24 +45,77 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         /** Ringtone Part **/
-        final TextView helloWorld = (TextView) findViewById(R.id.helloWorld);
+        final TextView backup = (TextView) findViewById(R.id.backup);
         Uri defaultRintoneUri = RingtoneManager.getActualDefaultRingtoneUri(this.getApplicationContext(), RingtoneManager.TYPE_RINGTONE);
         final Ringtone defaultRingtone = RingtoneManager.getRingtone(this, defaultRintoneUri);
         final String defaultRingtoneTitle = defaultRingtone.getTitle(this);
         /** Ringtone Part **/
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        mainLayout = (ConstraintLayout) findViewById(R.id.content_main);
+        backupLayout = (ConstraintLayout) findViewById(R.id.content_backup);
+        optionsList = (ListView) findViewById(R.id.optionsList);
+
+        // Floating Action Button Definition - BEGIN //
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+               //Test Amaçlı Eklenmişti
+                //backupLayout.setVisibility(View.INVISIBLE);
+
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
                 /** Ringtone Check! **/
-                defaultRingtone.play();
-                helloWorld.setText(defaultRingtoneTitle);
+                //defaultRingtone.play();
+                //backup.setText(defaultRingtoneTitle);
                 /** Ringtone Check! **/
+                new Sync(getApplicationContext(), optionsList);
+                System.out.println("FAB END!");
             }
         });
+
+        fab.setVisibility(View.INVISIBLE);
+        // Floating Action Button Definition - END //
+
+        // Backup Functionality Listener Definition - BEGIN //
+        backup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /** NEW UI for BackUp Options **/
+                optionsListAdapter = new OptionsListAdapter((Activity) backup.getContext());
+                optionsList.setAdapter(optionsListAdapter);
+
+                final TranslateAnimation animate = new TranslateAnimation(backupLayout.getWidth(),0,0,0);
+                animate.setDuration(750);
+                animate.setFillAfter(false);
+                animate.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        backupLayout.setVisibility(View.VISIBLE);
+                        System.out.println("TA BEGIN!");
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        //mainLayout.setVisibility(View.INVISIBLE);
+                        System.out.println("TA END!");
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                        System.out.println("TA REPEAT!");
+
+                    }
+                });
+
+                backupLayout.startAnimation(animate);
+                System.out.println("TV END!");
+                fab.setVisibility(View.VISIBLE);
+            }
+        });
+        // Backup Functionality Listener Definition - END //
+
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
@@ -96,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
                         + " " + myCursor.getString(2));
             }
         }
-        myCursor.close();
+        //Pause-Restart hata veriyor şimdilik kapatma.
+        //myCursor.close();
         /**Contact Ringtones**/
 
         // Here, thisActivity is the current activity
@@ -138,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
                            + " " + myRingtonesCursor.getString(2));
             }
         }
-        myRingtonesCursor.close();
+        //Pause-Restart hata veriyor şimdilik kapatma.
+        //myRingtonesCursor.close();
         /**Ringtones**/
     }
 

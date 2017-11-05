@@ -4,18 +4,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/content_main"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    app:layout_constraintVertical_weight="1"
     tools:context="com.cangevgeli.androidsync.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:id="@+id/helloWorld"
+    <android.support.constraint.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/verticalLeft"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/verticalRight"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/horizontalTop"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/horizontalMid1"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/horizontalMid2"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.55" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/horizontalBottom"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <TextView
+        android:id="@+id/backup"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="BackUp to Drive"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@color/colorAccent"
+        app:layout_constraintTop_toTopOf="@+id/horizontalTop"
+        app:layout_constraintLeft_toLeftOf="@+id/verticalLeft"
+        app:layout_constraintRight_toLeftOf="@id/verticalRight"
+        app:layout_constraintBottom_toTopOf="@id/horizontalMid1"/>
+
+    <TextView
+        android:id="@+id/sync"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="Sync from Drive"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@color/colorAccent"
+        app:layout_constraintTop_toTopOf="@+id/horizontalMid2"
+        app:layout_constraintLeft_toLeftOf="@+id/verticalLeft"
+        app:layout_constraintRight_toLeftOf="@id/verticalRight"
+        app:layout_constraintBottom_toTopOf="@id/horizontalBottom"/>
+
+
 
 </android.support.constraint.ConstraintLayout>
