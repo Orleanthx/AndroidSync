@@ -16,7 +16,7 @@ import android.widget.TextView;
 public class OptionsListAdapter extends BaseAdapter {
     private Activity context;
     private LayoutInflater layoutInflater;
-    private String[] optionsList = {"Assigned Ringtone","External Ringtones","Contact Ringtones"};
+    private String[] optionsList = {"Assigned Ringtone","Unassigned Ringtones","Contact Ringtones"};
     private int size = optionsList.length;
 
     public OptionsListAdapter(Activity context){
@@ -70,7 +70,7 @@ public class OptionsListAdapter extends BaseAdapter {
         return v;
     }
 
-    private class OptionsListHolder {
+    public class OptionsListHolder {
         public final CheckBox checkBox;
         public final TextView optionText;
 
