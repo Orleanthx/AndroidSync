@@ -9,6 +9,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,13 +17,29 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveClient;
+import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.drive.DriveResourceClient;
+import com.google.android.gms.drive.MetadataChangeSet;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +49,11 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout;
     private ConstraintLayout backupLayout;
     private ConstraintLayout syncLayout;
+
+    private GoogleSignInClient googleSignInClient;
+    private GoogleSignInAccount googleSignInAccount;
+    private DriveClient driveClient;
+    private DriveResourceClient driveResourceClient;
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -43,6 +65,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /** Google Drive **/
+        googleSignInClient = buildGoogleSignInClient();
+        updateViewWithGoogleSignInAccountTask(googleSignInClient.silentSignIn());
+
+        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+                .setTitle("New file")
+                .setMimeType("text/plain")
+                .setStarred(true)
+                .build();
+
+        //System.out.println("Drive Resource Client: " + driveResourceClient.toString());
+        //System.out.println("Root Folder: " + driveResourceClient.getRootFolder().toString());
+        //System.out.println("App Folder: " + driveResourceClient.getAppFolder().toString());
+        //driveResourceClient.createFile(driveResourceClient.getAppFolder().getResult(), changeSet, null);
+
 
         /** Ringtone Part **/
         final TextView backup = (TextView) findViewById(R.id.backup);
@@ -269,4 +307,86 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** Build a Google SignIn client. */
+    private GoogleSignInClient buildGoogleSignInClient() {
+        GoogleSignInOptions signInOptions =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        //.requestIdToken("1001563987200-83luo4kvdqbk13ftj60o2c44idfvipuo.apps.googleusercontent.com")
+                        .requestScopes(Drive.SCOPE_APPFOLDER, Drive.SCOPE_FILE)
+                        .build()
+                        ;
+
+        return GoogleSignIn.getClient(this, signInOptions);
+    }
+
+    private void updateViewWithGoogleSignInAccountTask(Task<GoogleSignInAccount> task) {
+        Log.i("Drive Access", "Update view with sign in account task");
+        task.addOnSuccessListener(
+                new OnSuccessListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onSuccess(GoogleSignInAccount googleSignInAccount) {
+                        Log.i("Drive Access", "Sign in success");
+                        initializeDrive(googleSignInAccount);
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("Drive Access", "Sign in failed", e);
+                                startActivity(googleSignInClient.getSignInIntent());
+                                if ( GoogleSignIn.getLastSignedInAccount(getApplicationContext()) != null )
+                                    initializeDrive(GoogleSignIn.getLastSignedInAccount(getApplicationContext()));
+
+                            }
+                        });
+    }
+
+    private void initializeDrive(GoogleSignInAccount googleSignInAccount) {
+        // Store Google Sign In Account
+        this.googleSignInAccount = googleSignInAccount;
+        // Build a drive client.
+        driveClient = Drive.getDriveClient(getApplicationContext(), googleSignInAccount);
+        // Build a drive resource client.
+        driveResourceClient = Drive.getDriveResourceClient(getApplicationContext(), googleSignInAccount);
+
+        createFolder();
+
+        Log.v("Drive Access", "Drive Access Successful. " + driveClient.toString() + " " + driveResourceClient.getAppFolder().toString());
+    }
+
+
+    private void createFolder() {
+        driveResourceClient
+                //Yaratılan Klasörü Test Edebilmek İçin Root Folder
+                .getRootFolder()
+                //.getAppFolder()
+                .continueWithTask(new Continuation<DriveFolder, Task<DriveFolder>>() {
+                    @Override
+                    public Task<DriveFolder> then(@NonNull Task<DriveFolder> task)
+                            throws Exception {
+                        DriveFolder parentFolder = task.getResult();
+                        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+                                .setTitle("New folder")
+                                .setMimeType(DriveFolder.MIME_TYPE)
+                                .setStarred(true)
+                                .build();
+                        return driveResourceClient.createFolder(parentFolder, changeSet);
+                    }
+                })
+                .addOnSuccessListener(this,
+                        new OnSuccessListener<DriveFolder>() {
+                            @Override
+                            public void onSuccess(DriveFolder driveFolder) {
+                                Log.v("Folder Creation", "File created " + driveFolder.getDriveId().encodeToString());
+                            }
+                        })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.v("Folder Creation", "Unable to create file", e);
+                        finish();
+                    }
+                });
+    }
 }
