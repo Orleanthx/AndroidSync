@@ -10,6 +10,10 @@ import android.widget.TextView;
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,22 +68,30 @@ public class Sync {
                     + " "  + currentDateandTime;
 
             Task<DriveFolder> createDriveFolderTask = drive.createFolder(syncName);
-            Task<DriveFile> uploadFileTask = drive.uploadFile(createDriveFolderTask, "applicationLog", null);
+            Task<DriveFile> uploadFileTask = drive.uploadFile(createDriveFolderTask, "applicationLog", null, null);
 
             RingtoneActivity ra = new RingtoneActivity(context);
+            RingtoneConfiguration rc = new RingtoneConfiguration();
             if(defaultRingtone){
                 String[] defaultRingtoneDetails = ra.getDefaultRingtone();
+                rc.setDefaultRingtone(defaultRingtoneDetails[1]);
 
-                uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", defaultRingtoneDetails);
+                uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", defaultRingtoneDetails, null);
             }
 
             if(contactRingtones){
                 ArrayList<String[]> contactRingtoneDetails = ra.getContactRingtones();
+                rc.setContactRingtones(ra.getContactRingtoneAssingments());
                 for(int i=0; i<contactRingtoneDetails.size(); i++){
-                    uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", contactRingtoneDetails.get(i));
+                    uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", contactRingtoneDetails.get(i), null);
                 }
             }
 
+            String ringtoneConfiguration = new Gson().toJson(rc);
+            System.out.println("JSON: " + ringtoneConfiguration);
+            uploadFileTask = drive.uploadFile(uploadFileTask, "ringtoneConfiguration", null, ringtoneConfiguration);
+            //RingtoneConfiguration rc2 = gson.fromJson(json, RingtoneConfiguration.class);
+            //System.out.println(" From JSON: " + rc2.getDefaultRingtone() + rc.getContactRingtones().get(0)[0]+" "+ rc.getContactRingtones().get(0)[1]);
         }
 
     }

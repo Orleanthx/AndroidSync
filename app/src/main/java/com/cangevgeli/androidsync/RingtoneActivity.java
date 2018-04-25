@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class RingtoneActivity {
     Context context;
     ArrayList<String[]> audioFiles = new ArrayList<String[]>();
+    ArrayList<String[]> contactRingtoneAssignments = new ArrayList<String[]>();
 
     RingtoneActivity(Context context){
         this.context = context;
@@ -59,21 +60,28 @@ public class RingtoneActivity {
         /**Contact Ringtones**/
         String[] projection = new String[]{ ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                                            ContactsContract.CommonDataKinds.Phone.CUSTOM_RINGTONE};
+                                            ContactsContract.CommonDataKinds.Phone.CUSTOM_RINGTONE,
+                                            ContactsContract.CommonDataKinds.Phone.NUMBER};
 
         Cursor myCursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, null, null, null);
+
         while (myCursor.moveToNext())
         {
             String ringtoneURI = myCursor.getString(2);
             if(ringtoneURI != null ) {
 
                 String ringtoneID = ringtoneURI.substring(ringtoneURI.lastIndexOf("/")+1);
+                String ringtone = null;
                 for(int i=0; i<audioFiles.size(); i++) {
                     if(audioFiles.get(i)[0].equals(ringtoneID)) {
-                        contactRingtones.add(audioFiles.get(i));
+                        if(!contactRingtones.contains(audioFiles.get(i))) {
+                            contactRingtones.add(audioFiles.get(i));
+                            ringtone = audioFiles.get(i)[1];
+                        }
                     }
                 }
-                //System.out.println("Contact Ringtones: " +
+            contactRingtoneAssignments.add(new String[]{myCursor.getString(3),myCursor.getString(1),ringtone});
+                //System.out.println("Contact Ringtone Assignments: " +
                 //        myCursor.getString(0)
                 //        + " " + myCursor.getString(1)
                 //        + " " + myCursor.getString(2));
@@ -83,9 +91,10 @@ public class RingtoneActivity {
         myCursor.close();
         /**Contact Ringtones**/
 
-
-
-
         return contactRingtones ;
+    }
+
+    public ArrayList<String[]> getContactRingtoneAssingments(){
+       return contactRingtoneAssignments ;
     }
 }

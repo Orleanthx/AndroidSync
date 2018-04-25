@@ -61,7 +61,7 @@ public class Drive {
                         Log.v("Drive Access", "Sign in success");
                         initializeDrive(googleSignInAccount);
                     }
-                })
+                  })
                 .addOnFailureListener(
                         new OnFailureListener() {
                             @Override
@@ -120,7 +120,7 @@ public class Drive {
                 });
     }
 
-    public Task<DriveFile> uploadFile (Task createDriveFolderTask, final String fileType, final String[] fileDetails) {
+    public Task<DriveFile> uploadFile (Task createDriveFolderTask, final String fileType, final String[] fileDetails, final String configuration) {
         final Task<DriveContents> createContentsTask = driveResourceClient.createContents();
 
         return Tasks.whenAll(createContentsTask, createDriveFolderTask)
@@ -141,6 +141,12 @@ public class Drive {
                         else if(fileType.equals("applicationLog")){
                             changeSetBuilder.setTitle("Application Log")
                                             .setMimeType("text/plain");
+                        }
+                        else if(fileType.equals("ringtoneConfiguration")) {
+                            changeSetBuilder.setTitle("Ringtone Configuration")
+                                            .setMimeType("text/plain");
+                            driveContents.getOutputStream().write(configuration.getBytes());
+                            Log.v("Ringtone Configuration",configuration);
                         }
 
 
