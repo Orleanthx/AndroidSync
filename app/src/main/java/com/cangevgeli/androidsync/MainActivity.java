@@ -4,12 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -146,30 +141,6 @@ public class MainActivity extends AppCompatActivity {
         /** Google Drive **/
         drive = new Drive(this);
 
-        /** Ringtone Part **/
-        Uri defaultRintoneUri = RingtoneManager.getActualDefaultRingtoneUri(this.getApplicationContext(), RingtoneManager.TYPE_RINGTONE);
-        final Ringtone defaultRingtone = RingtoneManager.getRingtone(this, defaultRintoneUri);
-        final String defaultRingtoneTitle = defaultRingtone.getTitle(this);
-        /** Ringtone Part **/
-
-
-        /**Contact Ringtones**/
-        String[] myProjection = new String[]{ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                                             ContactsContract.CommonDataKinds.Phone.CUSTOM_RINGTONE};
-
-        Cursor myCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, myProjection, null, null, null);
-        while (myCursor.moveToNext())
-        {
-            if(myCursor.getString(2) != null ) {
-               System.out.println(myCursor.getString(0)
-                        + " " + myCursor.getString(1)
-                        + " " + myCursor.getString(2));
-            }
-        }
-        //Pause-Restart hata veriyor şimdilik kapatma.
-        //myCursor.close();
-        /**Contact Ringtones**/
 
         /**Ringtones**/
         RingtoneManager myRingtones = new RingtoneManager(this);

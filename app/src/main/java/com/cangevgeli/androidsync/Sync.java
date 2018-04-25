@@ -1,17 +1,18 @@
 package com.cangevgeli.androidsync;
 
 import android.content.Context;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.tasks.Task;
+
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -52,25 +53,35 @@ public class Sync {
 
         }
 
+
         //System.out.println("Sync: " + defaultRingtone + allRingtones + contactRingtones);
+        if(defaultRingtone || allRingtones || contactRingtones) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String currentDateandTime = sdf.format(new Date());
+            String syncName = Build.BRAND.substring(0,1).toUpperCase()
+                    + Build.BRAND.substring(1)
+                    + " " + Build.MODEL
+                    + " "  + currentDateandTime;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String currentDateandTime = sdf.format(new Date());
-        String syncName = Build.BRAND.substring(0,1).toUpperCase()
-                        + Build.BRAND.substring(1)
-                        + " " + Build.MODEL
-                        + " "  + currentDateandTime;
+            Task<DriveFolder> createDriveFolderTask = drive.createFolder(syncName);
+            Task<DriveFile> uploadFileTask = drive.uploadFile(createDriveFolderTask, "applicationLog", null);
 
-        drive.createFolder(syncName);
+            RingtoneActivity ra = new RingtoneActivity(context);
+            if(defaultRingtone){
+                String[] defaultRingtoneDetails = ra.getDefaultRingtone();
 
-        /**
-        if (defaultRingtone)
-        {
-            Uri defaultRintoneUri = RingtoneManager.getActualDefaultRingtoneUri(context.getApplicationContext(), RingtoneManager.TYPE_RINGTONE);
-            final Ringtone defaultRingtone = RingtoneManager.getRingtone(context, defaultRintoneUri);
-            defaultRingtone.play();
+                uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", defaultRingtoneDetails);
+            }
+
+            if(contactRingtones){
+                ArrayList<String[]> contactRingtoneDetails = ra.getContactRingtones();
+                for(int i=0; i<contactRingtoneDetails.size(); i++){
+                    uploadFileTask = drive.uploadFile(uploadFileTask, "ringtone", contactRingtoneDetails.get(i));
+                }
+            }
+
         }
-         **/
+
     }
 
 }
